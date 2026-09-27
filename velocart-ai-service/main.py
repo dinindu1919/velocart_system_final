@@ -70,7 +70,7 @@ llm = LLMWrapper()
 
 # C# Backend API URLs
 # Using internal Docker network hostname instead of localhost!
-CSHARP_BASE_URL = "http://api:8080/api"
+CSHARP_BASE_URL = os.getenv("CSHARP_BASE_URL", "http://api:8080/api")
 TOOL_INVENTORY_URL = f"{CSHARP_BASE_URL}/InventoryAnalytics/expiring"
 TOOL_DISPUTES_URL = f"{CSHARP_BASE_URL}/DisputeAnalytics/pending"
 TOOL_DEMAND_URL = f"{CSHARP_BASE_URL}/SupplyChainAnalytics/demand-forecast"
