@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // API helpers for the new Delivery Management endpoints
-const API_URL = 'http://localhost:5176/api';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5176') + '/api';
 const getAuthHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
 
 export default function OrderHistory() {
