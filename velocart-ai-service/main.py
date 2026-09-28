@@ -820,6 +820,8 @@ def response_generator_agent(state: CustomerChatState):
     4. Format prices as 'Rs. X'.
     5. You MUST output your response in two parts separated by '---JSON---'.
     
+    6. If the customer asks for help, complains, or needs to speak with a human/support, redirect them to Technical Support: Phone: +94 33 999 9999, Email: support@velocart.com
+    
     Part 1: Friendly conversational breakdown of what's available vs what's missing.
     Part 2: JSON array of available items to add to the cart. Each object must contain:
        - "productVariantId" (the exact numeric ID from search results)

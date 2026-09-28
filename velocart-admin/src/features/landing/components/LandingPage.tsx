@@ -3016,12 +3016,14 @@ export default function LandingPage() {
                             </h4>
 
                             <div className="mt-5 space-y-3 text-sm text-gray-600">
-                                <button className="block transition hover:text-[#D4AF37]">
-                                    Help Center
-                                </button>
+                                <div className="mb-4">
+                                    <span className="block font-bold text-gray-400 mb-1">Technical Support</span>
+                                    <a href="tel:+94339999999" className="block transition hover:text-[#D4AF37]">+94 33 999 9999</a>
+                                    <a href="mailto:support@velocart.com" className="block transition hover:text-[#D4AF37]">support@velocart.com</a>
+                                </div>
 
                                 <button className="block transition hover:text-[#D4AF37]">
-                                    Contact
+                                    Help Center
                                 </button>
 
                                 <button className="block transition hover:text-[#D4AF37]">
