@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
+
 import 'dart:io'; 
 import '../../catalog/api/catalog_api.dart';
 import '../../auth/services/auth_api_service.dart';
@@ -543,102 +547,168 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-  Future<void> _downloadReceiptAsText(
-    Map<String, dynamic> receiptData,
-  ) async {
+  Future<void> _downloadReceiptAsText(Map<String, dynamic> receiptData) async {
     try {
-      final String orderNumber =
-          receiptData['orderNumber'];
-
-      final String fileName =
-          'Velocart_Receipt_$orderNumber.txt';
-
-      final directory =
-          Directory('/storage/emulated/0/Download');
+      final String orderNumber = receiptData['orderNumber'];
+      final String fileName = 'Velocart_Receipt_$orderNumber.pdf';
+      final directory = Directory('/storage/emulated/0/Download');
 
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
 
-      final file =
-          File('${directory.path}/$fileName');
+      final file = File('${directory.path}/$fileName');
 
-      StringBuffer buffer = StringBuffer();
-
-      buffer.writeln(
-          "====================================");
-      buffer.writeln(
-          " VELOCART - Official Digital Receipt");
-      buffer.writeln(
-          "====================================\n");
-
-      buffer.writeln(
-          "BILLED TO: ${receiptData['customerName']}");
-      buffer.writeln(
-          "EMAIL: ${receiptData['customerEmail']}\n");
-
-      buffer.writeln(
-          "ORDER NO: $orderNumber");
-      buffer.writeln(
-          "STATUS: ${receiptData['paymentStatus']}\n");
-
-      buffer.writeln(
-          "------------------------------------");
-      buffer.writeln("ITEMS:");
-
-      for (var item in receiptData['items']) {
-        buffer.writeln(
-          "${item['quantity']}x ${item['productName']} - Rs. ${item['total'].toStringAsFixed(2)}",
-        );
+      final pdf = pw.Document();
+      
+      // Load logo
+      pw.MemoryImage? logoImage;
+      try {
+        final ByteData bytes = await rootBundle.load('assets/App_Img.jpeg');
+        logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
+      } catch (e) {
+        print("Logo not found");
       }
 
-      buffer.writeln(
-          "------------------------------------");
-
-      buffer.writeln(
-        "Subtotal:         Rs. ${receiptData['subtotal'].toStringAsFixed(2)}",
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                if (logoImage != null)
+                  pw.Center(
+                    child: pw.Image(logoImage, width: 80, height: 80),
+                  ),
+                pw.SizedBox(height: 10),
+                pw.Text("VeloCart", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 5),
+                pw.Text("Official Digital Receipt", style: pw.TextStyle(fontSize: 14, color: PdfColors.grey700)),
+                pw.SizedBox(height: 10),
+                pw.Text("Technical Support: +94 33 999 9999", style: pw.TextStyle(fontSize: 12)),
+                pw.Text("Email: support@velocart.com", style: pw.TextStyle(fontSize: 12)),
+                pw.Divider(thickness: 1, color: PdfColors.grey400),
+                pw.SizedBox(height: 20),
+                
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text("BILLED TO:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        pw.Text(receiptData['customerName'] ?? "", style: pw.TextStyle(fontSize: 12)),
+                        pw.Text(receiptData['customerEmail'] ?? "", style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
+                      ],
+                    ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text("ORDER NO:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        pw.Text(orderNumber, style: pw.TextStyle(fontSize: 12)),
+                        pw.Text(receiptData['paymentStatus'] ?? "", style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
+                      ],
+                    ),
+                  ]
+                ),
+                pw.SizedBox(height: 20),
+                pw.Divider(thickness: 1, color: PdfColors.grey400),
+                pw.SizedBox(height: 10),
+                
+                // Items Header
+                pw.Row(
+                  children: [
+                    pw.Expanded(flex: 3, child: pw.Text("Item", style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+                    pw.Expanded(flex: 1, child: pw.Text("Qty", style: pw.TextStyle(fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center)),
+                    pw.Expanded(flex: 2, child: pw.Text("Total", style: pw.TextStyle(fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right)),
+                  ]
+                ),
+                pw.SizedBox(height: 10),
+                
+                // Items List
+                ...(receiptData['items'] as List).map((item) {
+                  return pw.Padding(
+                    padding: const pw.EdgeInsets.only(bottom: 5),
+                    child: pw.Row(
+                      children: [
+                        pw.Expanded(flex: 3, child: pw.Text(item['productName'].toString())),
+                        pw.Expanded(flex: 1, child: pw.Text(item['quantity'].toString(), textAlign: pw.TextAlign.center)),
+                        pw.Expanded(flex: 2, child: pw.Text("Rs. ${item['total'].toStringAsFixed(2)}", textAlign: pw.TextAlign.right)),
+                      ]
+                    )
+                  );
+                }),
+                
+                pw.SizedBox(height: 10),
+                pw.Divider(thickness: 1, color: PdfColors.grey400),
+                pw.SizedBox(height: 10),
+                
+                // Totals
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text("Subtotal:"),
+                    pw.Text("Rs. ${receiptData['subtotal'].toStringAsFixed(2)}")
+                  ]
+                ),
+                if (receiptData['discountAmount'] > 0)
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text("Promotions:"),
+                      pw.Text("-Rs. ${receiptData['discountAmount'].toStringAsFixed(2)}")
+                    ]
+                  ),
+                if (receiptData['loyaltyDiscountAmount'] > 0)
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text("Loyalty Pts:"),
+                      pw.Text("-Rs. ${receiptData['loyaltyDiscountAmount'].toStringAsFixed(2)}")
+                    ]
+                  ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text("VAT/Taxes:"),
+                    pw.Text("Rs. ${receiptData['taxAmount'].toStringAsFixed(2)}")
+                  ]
+                ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text("Delivery:"),
+                    pw.Text("Rs. ${receiptData['deliveryFee'].toStringAsFixed(2)}")
+                  ]
+                ),
+                pw.SizedBox(height: 10),
+                pw.Divider(thickness: 1, color: PdfColors.grey400),
+                pw.SizedBox(height: 5),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text("GRAND TOTAL:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                    pw.Text("Rs. ${receiptData['grandTotal'].toStringAsFixed(2)}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14))
+                  ]
+                ),
+                
+                pw.Spacer(),
+                pw.Center(
+                  child: pw.Text("Thank you for shopping with VeloCart!", style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
+                )
+              ],
+            );
+          },
+        ),
       );
 
-      if (receiptData['discountAmount'] > 0) {
-        buffer.writeln(
-          "Promotions:      -Rs. ${receiptData['discountAmount'].toStringAsFixed(2)}",
-        );
-      }
-
-      if (receiptData['loyaltyDiscountAmount'] > 0) {
-        buffer.writeln(
-          "Loyalty Pts:     -Rs. ${receiptData['loyaltyDiscountAmount'].toStringAsFixed(2)}",
-        );
-      }
-
-      buffer.writeln(
-        "VAT/Taxes:        Rs. ${receiptData['taxAmount'].toStringAsFixed(2)}",
-      );
-
-      buffer.writeln(
-        "Delivery:         Rs. ${receiptData['deliveryFee'].toStringAsFixed(2)}",
-      );
-
-      buffer.writeln(
-          "------------------------------------");
-
-      buffer.writeln(
-        "GRAND TOTAL:      Rs. ${receiptData['grandTotal'].toStringAsFixed(2)}",
-      );
-
-      buffer.writeln(
-          "====================================");
-
-      await file.writeAsString(
-        buffer.toString(),
-      );
+      await file.writeAsBytes(await pdf.save());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "Receipt downloaded to Downloads folder ($fileName)",
-            ),
+            content: Text("PDF Receipt saved to Downloads ($fileName)"),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -647,11 +717,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Download failed. Storage permission might be required.",
-            ),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: Text("Failed to download receipt: $e"),
+            backgroundColor: Colors.redAccent,
           ),
         );
       }

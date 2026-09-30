@@ -306,7 +306,8 @@ namespace velocart_system.API.Features.Orders.Controllers
             
             if (request.PaymentMethod == "CARD" && order.GrandTotal > 0)
             {
-                var options = new SessionCreateOptions { PaymentMethodTypes = new List<string> { "card" }, LineItems = stripeLineItems, Mode = "payment", SuccessUrl = "http://localhost:5173/orders?payment=success", CancelUrl = "http://localhost:5173/catalog?payment=cancelled", Metadata = new Dictionary<string, string> { { "OrderNumber", order.OrderNumber } } };
+                var frontendUrl = _configuration["FrontendUrl"] ?? "https://spontaneous-sable-99b041.netlify.app";
+                var options = new SessionCreateOptions { PaymentMethodTypes = new List<string> { "card" }, LineItems = stripeLineItems, Mode = "payment", SuccessUrl = $"{frontendUrl}/catalog", CancelUrl = $"{frontendUrl}/catalog", Metadata = new Dictionary<string, string> { { "OrderNumber", order.OrderNumber } } };
                 var service = new SessionService();
                 var session = await service.CreateAsync(options);
                 stripeUrl = session.Url;
