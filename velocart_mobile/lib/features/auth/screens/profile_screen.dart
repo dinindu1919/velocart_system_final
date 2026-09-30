@@ -436,11 +436,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.headset_mic_rounded, color: accentColor, size: 18),
-                            SizedBox(width: 8),
-                            Text("Technical Support", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Icon(Icons.headset_mic_rounded, color: primaryGold, size: 18),
+                            const SizedBox(width: 8),
+                            const Text("Technical Support", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 12),
