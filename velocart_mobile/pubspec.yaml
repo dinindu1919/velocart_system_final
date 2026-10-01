@@ -45,6 +45,7 @@ dependencies:
   video_player: ^2.14.0
   pdf: ^3.13.1
   path_provider: ^2.1.6
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/videos/Landing-video.mp4
+    - assets/App_Img.jpeg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

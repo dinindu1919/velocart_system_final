@@ -177,7 +177,8 @@ namespace velocart_system.API.Features.Identity.Controllers
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
                 
-                var verificationLink = $"http://localhost:5173/verify-email?token={newUser.VerificationToken}";
+                var frontendUrl = _configuration["FrontendUrl"] ?? "https://velocart.netlify.app";
+                var verificationLink = $"{frontendUrl}/verify-email?token={newUser.VerificationToken}";
                 var emailBody = $@"
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;'>
                         <h2 style='color: #D4AF37;'>Welcome to Velocart!</h2>
@@ -190,7 +191,7 @@ namespace velocart_system.API.Features.Identity.Controllers
                     </div>";
                 
                 await _emailService.SendEmailAsync(newUser.Email, "Verify Your Velocart Account", emailBody);
-                return Ok(new { message = "Registration successful. Please check your email to verify your account.", token = newUser.VerificationToken });
+                return Ok(new { message = "Registration successful. Please check your email to verify your account." });
             }
             catch (Exception ex)
             {
@@ -349,10 +350,11 @@ namespace velocart_system.API.Features.Identity.Controllers
 
             user.VerificationToken = Guid.NewGuid().ToString(); user.VerificationTokenExpires = DateTime.UtcNow.AddHours(24);
             await _context.SaveChangesAsync();
-            var verificationLink = $"http://localhost:5173/verify-email?token={user.VerificationToken}";
+            var frontendUrl = _configuration["FrontendUrl"] ?? "https://velocart.netlify.app";
+            var verificationLink = $"{frontendUrl}/verify-email?token={user.VerificationToken}";
             var emailBody = $"<h3>Velocart Verification</h3><p>Please verify your email by clicking <a href='{verificationLink}'>here</a>.</p>";
             await _emailService.SendEmailAsync(user.Email, "Verify Your Velocart Account", emailBody);
-            return Ok(new { message = msg, token = user.VerificationToken }); 
+            return Ok(new { message = msg }); 
         }
 
         [HttpPost("forgot-password")]
@@ -365,7 +367,8 @@ namespace velocart_system.API.Features.Identity.Controllers
 
             user.PasswordResetToken = Guid.NewGuid().ToString(); user.PasswordResetTokenExpires = DateTime.UtcNow.AddHours(1);
             await _context.SaveChangesAsync();
-            var resetLink = $"http://localhost:5173/reset-password?token={user.PasswordResetToken}";
+            var frontendUrl = _configuration["FrontendUrl"] ?? "https://velocart.netlify.app";
+            var resetLink = $"{frontendUrl}/reset-password?token={user.PasswordResetToken}";
             
             var emailBody = $@"
                 <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;'>
@@ -375,7 +378,7 @@ namespace velocart_system.API.Features.Identity.Controllers
                     <p style='margin-top: 30px; font-size: 12px; color: #888;'>This link will expire in 1 hour. If you did not request this, you can safely ignore this email.</p>
                 </div>";
             await _emailService.SendEmailAsync(user.Email, "Reset Your Velocart Password", emailBody);
-            return Ok(new { message = msg, token = user.PasswordResetToken });
+            return Ok(new { message = msg });
         }
 
         [HttpPost("reset-password")]

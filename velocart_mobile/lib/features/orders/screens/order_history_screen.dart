@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -551,13 +553,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     try {
       final String orderNumber = receiptData['orderNumber'];
       final String fileName = 'Velocart_Receipt_$orderNumber.pdf';
-      final directory = Directory('/storage/emulated/0/Download');
-
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
-      }
-
-      final file = File('${directory.path}/$fileName');
 
       final pdf = pw.Document();
       
@@ -703,17 +698,10 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         ),
       );
 
-      await file.writeAsBytes(await pdf.save());
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("PDF Receipt saved to Downloads ($fileName)"),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: fileName,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
