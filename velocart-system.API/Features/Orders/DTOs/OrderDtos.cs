@@ -15,6 +15,7 @@ namespace velocart_system.API.Features.Orders.DTOs
 
         // NEW: SRS 6.7 Loyalty Point Redemption
         public int PointsToRedeem { get; set; } = 0;
+        public bool IsMobile { get; set; } = false;
     }
 
     public class CheckoutResponseDto

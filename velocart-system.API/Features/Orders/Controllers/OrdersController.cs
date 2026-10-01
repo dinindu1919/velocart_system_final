@@ -307,7 +307,9 @@ namespace velocart_system.API.Features.Orders.Controllers
             if (request.PaymentMethod == "CARD" && order.GrandTotal > 0)
             {
                 var frontendUrl = _configuration["FrontendUrl"] ?? "https://spontaneous-sable-99b041.netlify.app";
-                var options = new SessionCreateOptions { PaymentMethodTypes = new List<string> { "card" }, LineItems = stripeLineItems, Mode = "payment", SuccessUrl = $"{frontendUrl}/catalog", CancelUrl = $"{frontendUrl}/catalog", Metadata = new Dictionary<string, string> { { "OrderNumber", order.OrderNumber } } };
+                var sUrl = request.IsMobile ? "velocart://payment/success" : $"{frontendUrl}/catalog";
+                var cUrl = request.IsMobile ? "velocart://payment/cancelled" : $"{frontendUrl}/catalog";
+                var options = new SessionCreateOptions { PaymentMethodTypes = new List<string> { "card" }, LineItems = stripeLineItems, Mode = "payment", SuccessUrl = sUrl, CancelUrl = cUrl, Metadata = new Dictionary<string, string> { { "OrderNumber", order.OrderNumber } } };
                 var service = new SessionService();
                 var session = await service.CreateAsync(options);
                 stripeUrl = session.Url;

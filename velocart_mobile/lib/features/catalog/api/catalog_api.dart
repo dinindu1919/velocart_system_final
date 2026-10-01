@@ -140,7 +140,8 @@ class CatalogApi {
           'forceCheckout': forceCheckout,
           'paymentMethod': paymentMethod,
           'idempotencyKey': idempotencyKey,
-          'pointsToRedeem': pointsToRedeem // ADDED TO PAYLOAD
+          'pointsToRedeem': pointsToRedeem,
+          'isMobile': true // ADDED TO PAYLOAD
         }),
       );
 
