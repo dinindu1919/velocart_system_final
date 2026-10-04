@@ -93,6 +93,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -108,8 +110,9 @@ app.UseCors("AllowAll");
 app.UseAuthentication(); 
 app.UseAuthorization();
 
-// 6. Map the API Controllers
+// 6. Map the API Controllers and Health Check
 app.MapControllers();
+app.MapHealthChecks("/api/health");
 
 // 7. Database Migration and Seeding
 using (var scope = app.Services.CreateScope())

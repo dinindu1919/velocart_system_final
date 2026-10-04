@@ -17,6 +17,7 @@ velocart_backup.dump
 *.suo
 *.user
 *.userprefs
+test_scripts/
 
 # .NET (velocart-system.API)
 [Bb]in/
@@ -56,3 +57,5 @@ ios/build/
 ios/.symlinks/
 *.jks
 *.keystore
+velocart_mobile/integration_test/
+velocart_mobile/test/

@@ -1,3 +1,4 @@
+from dotenv import load_dotenv; load_dotenv()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import TypedDict, List, Optional, Dict
@@ -14,6 +15,10 @@ from langchain_core.prompts import PromptTemplate
 # 1. SETUP & CONFIGURATION
 # ==========================================
 app = FastAPI(title="Velocart Agentic AI Subsystem")
+
+@app.get("/health")
+def health_check():
+    return {"status": "Healthy", "timestamp": datetime.utcnow().isoformat(), "service": "Agentic AI"}
 
 import os
 
