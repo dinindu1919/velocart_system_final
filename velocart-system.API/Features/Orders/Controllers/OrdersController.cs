@@ -587,6 +587,7 @@ namespace velocart_system.API.Features.Orders.Controllers
             return Ok(new { message = "Thank you for confirming your delivery!" });
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("{orderId}/complaints")]
         public async Task<ActionResult> SubmitComplaint(int orderId, [FromForm] string subject, [FromForm] string description, [FromForm] IFormFile? image)
         {
