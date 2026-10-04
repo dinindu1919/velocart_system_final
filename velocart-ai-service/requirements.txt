@@ -5,3 +5,4 @@ langgraph
 langchain_ollama
 langchain_core
 langchain-google-genai
+python-dotenv
