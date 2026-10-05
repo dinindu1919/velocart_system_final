@@ -140,6 +140,15 @@ namespace velocart_system.API.Features.Inventory.Controllers
             if (po.Status != POStatus.Received && po.Status != POStatus.Cancelled)
                 return BadRequest(new { message = "You can only delete historical orders (Fully Received or Cancelled)." });
 
+            var relatedReceipts = await _context.GoodsReceipts
+                .Where(gr => gr.PurchaseOrderId == id)
+                .ToListAsync();
+                
+            if (relatedReceipts.Any())
+            {
+                _context.GoodsReceipts.RemoveRange(relatedReceipts);
+            }
+
             // Ensure child items are removed to prevent foreign key constraint violations
             _context.PurchaseOrderItems.RemoveRange(po.Items);
             _context.PurchaseOrders.Remove(po);
