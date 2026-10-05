@@ -1,0 +1,46 @@
+name: Flutter Automated Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers workflow on version tags (e.g., v1.0.0, v2.1.3)
+
+jobs:
+  build-and-release:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0' # Adjust if needed, but this works for latest
+          channel: 'stable'
+
+      - name: Install Dependencies
+        working-directory: ./velocart_mobile
+        run: flutter pub get
+
+      - name: Build Android Release APK
+        working-directory: ./velocart_mobile
+        run: flutter build apk --release
+
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: velocart_mobile/build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
