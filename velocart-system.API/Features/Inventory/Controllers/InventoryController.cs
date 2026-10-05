@@ -131,13 +131,17 @@ namespace velocart_system.API.Features.Inventory.Controllers
         [HttpDelete("purchase-orders/{id}")]
         public async Task<IActionResult> DeletePurchaseOrder(int id)
         {
-            var po = await _context.PurchaseOrders.FirstOrDefaultAsync(p => p.Id == id);
+            var po = await _context.PurchaseOrders
+                                   .Include(p => p.Items)
+                                   .FirstOrDefaultAsync(p => p.Id == id);
             if (po == null) return NotFound(new { message = "Purchase Order not found." });
 
             // Validation: Prevent accidental deletion of Active/Pending orders
             if (po.Status != POStatus.Received && po.Status != POStatus.Cancelled)
                 return BadRequest(new { message = "You can only delete historical orders (Fully Received or Cancelled)." });
 
+            // Ensure child items are removed to prevent foreign key constraint violations
+            _context.PurchaseOrderItems.RemoveRange(po.Items);
             _context.PurchaseOrders.Remove(po);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Purchase Order permanently deleted from history." });
